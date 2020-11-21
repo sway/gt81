@@ -1,0 +1,92 @@
+.tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 4rem;
+  font-weight: 900;
+  margin: 1rem;
+  border-radius: 1rem;
+  background-color: rgba(0, 0, 0, 0.75);
+  font-feature-settings: "tnum", "lnum", "zero", "ss06";
+
+  @media screen and (max-width: 768px) {
+    font-size: 3rem;
+    margin: 0.75rem;
+  }
+}
+
+.tile-headline {
+  font-size: 1.25rem;
+  text-transform: uppercase;
+  text-align: center;
+
+  @media screen and (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+}
+
+.tile--status {
+  @extend .tile;
+  grid-area: status;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tile--hr {
+  @extend .tile;
+  grid-area: hr;
+  font-size: 13em;
+  transition: background-color 250ms linear;
+
+  @media screen and (max-width: 768px) {
+    font-size: 9rem;
+  }
+}
+
+.tile--hr--60 {
+  @extend .tile--hr;
+  background-color: #66d8ff;
+}
+
+.tile--hr--70 {
+  @extend .tile--hr;
+  background-color: deepskyblue;
+}
+
+.tile--hr--80 {
+  @extend .tile--hr;
+  background-color: #ff72be;
+}
+
+.tile--hr--90 {
+  @extend .tile--hr;
+  background-color: deeppink;
+}
+
+.tile--meta {
+  @extend .tile;
+}
+
+.tile--calories {
+  @extend .tile--meta;
+  grid-area: calories;
+}
+
+.tile--grit {
+  @extend .tile--meta;
+  grid-area: grit;
+}
+
+.tile--timer {
+  @extend .tile--meta;
+  grid-area: timer;
+}
+
+.tile--controls {
+  @extend .tile;
+  grid-area: controls;
+  flex-direction: row;
+  background-color: transparent;
+}
