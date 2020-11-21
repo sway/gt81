@@ -30,7 +30,7 @@ export type Actions =
   | "RESUME"
   | "END";
 
-const MULTIPLIER = 2.5;
+const MULTIPLIER = 1;
 
 const HEADLINE = {
   OFFLINE: "Not connected",
@@ -97,7 +97,7 @@ const UserView = (): JSX.Element => {
     const cb =
       factor &&
       (-55.0969 + 0.6309 * hr + 0.1988 * 82 + 0.2017 * 32) / 4.184 / factor;
-    const shouldGetGritPoint = true; //hrPerc >= 81;
+    const shouldGetGritPoint = hrPerc >= 0.81;
     const gp = shouldGetGritPoint && factor ? 1 / factor : 0;
 
     const newCalories = (dataRef.current?.calories || 0) + Math.max(cb, 0);
