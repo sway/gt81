@@ -5,11 +5,11 @@ export type TileProps = {
   emoji?: string;
   headline?: string;
   variant: keyof typeof tileStyles;
-  value?: number;
+  value?: number | null;
   children?: JSX.Element | string;
 };
 
-const Tile = (props: TileProps): JSX.Element => {
+export const Tile = (props: TileProps): JSX.Element => {
   return (
     <div className={tileStyles[props.variant]}>
       {props.emoji && (
@@ -20,9 +20,7 @@ const Tile = (props: TileProps): JSX.Element => {
       )}
       {!props.children && (
         <div>
-          {props.value
-            ? (props.value > 0 && Math.floor(props.value)) || "0"
-            : "--"}
+          {typeof props.value === "number" ? Math.floor(props.value) : "--"}
         </div>
       )}
       {props.children}
@@ -88,5 +86,3 @@ export const TimerTile = (props: {
     </Tile>
   );
 };
-
-export default Tile;

@@ -5,14 +5,12 @@
   align-items: center;
   font-size: 4rem;
   font-weight: 900;
-  margin: 1rem;
   border-radius: 1rem;
   background-color: rgba(0, 0, 0, 0.75);
   font-feature-settings: "tnum", "lnum", "zero", "ss06";
 
   @media screen and (max-width: 768px) {
     font-size: 3rem;
-    margin: 0.75rem;
   }
 }
 
@@ -32,6 +30,8 @@
   font-size: 1.5rem;
   text-transform: uppercase;
   letter-spacing: 1px;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .tile--hr {

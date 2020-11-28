@@ -3,8 +3,10 @@
   height: 100%;
   display: grid;
   grid-template-columns: 1fr minmax(400px, 1fr) 1fr;
-  grid-template-rows: 1fr 4fr 2fr 1fr;
-  grid-template-areas: "status status status" "hr hr hr" "calories timer grit" "controls controls controls";
+  grid-template-rows: 4rem 4fr 2fr 1fr;
+  grid-template-areas: "status status status" "hr hr hr" "calories timer grit" ". controls .";
+  gap: 1rem;
+  padding: 1rem;
   font-family: "Work Sans";
   background-color: #111111;
   background-image: url("~/assets/images/topo.svg");

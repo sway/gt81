@@ -1,26 +1,36 @@
 import { useInterval } from "@util/interval.hook";
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
+import useLocalStorageState from "use-local-storage-state";
+import Head from "next/head";
 
 import styles from "@styles/UserView.module.scss";
 
-import Tile, { HRTile, TimerTile } from "./Tile";
-
-import ActionButton from "@components/ActionButton";
+import { Tile, ActionButton, HRTile, TimerTile } from "./";
+import { ConfigModal } from "@components/modals";
 
 type Tick = {
-  calories: number;
-  currentHeartRate: number;
-  currentHeartRatePercentage: number;
-  gritPoints: number;
+  calories: number | null;
+  currentHeartRate: number | null;
+  currentHeartRatePercentage: number | null;
+  gritPoints: number | null;
   timestamp: number;
 };
 
+export type Config = {
+  default: boolean;
+  age: number;
+  weight: number;
+  gender: Gender;
+};
+
 export type Status =
+  | "UNCONFIGURED"
   | "OFFLINE"
   | "CONNECTING"
   | "CONNECTED"
   | "RUNNING"
-  | "PAUSED";
+  | "PAUSED"
+  | "ENDED";
 
 export type Actions =
   | "CONNECT"
@@ -30,26 +40,56 @@ export type Actions =
   | "RESUME"
   | "END";
 
+export type Gender = "MALE" | "FEMALE";
+
 const MULTIPLIER = 1;
 
-const HEADLINE = {
-  OFFLINE: "Not connected",
+const HEADLINE: { [S in Status]: string } = {
+  UNCONFIGURED: "Welcome to GT81! Configure your profile to get started",
+  OFFLINE: "Connect to your HR monitor...",
   CONNECTING: "Connecting...",
-  CONNECTED: "Ready!",
+  CONNECTED: "Ready! Let's do this 💪",
   RUNNING: "Workout running",
   PAUSED: "Workout paused",
+  ENDED: "Workout completed, well done!",
 };
 
 const UserView = (): JSX.Element => {
   const [data, _setData] = useState<Tick>();
+  const [record, _setRecord] = useState<Array<Tick>>([]);
   const [timer, setTimer] = useState(0);
-  const [status, _setStatus] = useState<Status>("OFFLINE");
   const [btDevice, setBtDevice] = useState<BluetoothDevice>();
-
-  useInterval(() => setTimer(timer + 1), status === "RUNNING" ? 1000 : null);
+  const [configModalOpen, setConfigModalOpen] = useState(false);
+  const [config, setConfig] = useLocalStorageState<Config>("config", {
+    default: true,
+    gender: "MALE",
+    age: 31,
+    weight: 82,
+  });
+  const [status, _setStatus] = useState<Status>(
+    config.default ? "UNCONFIGURED" : "OFFLINE"
+  );
 
   const dataRef = useRef(data);
   const statusRef = useRef(status);
+  const recordRef = useRef(record);
+
+  useInterval(
+    () => {
+      setTimer(timer + 1);
+      dataRef.current && addRecord(dataRef.current);
+    },
+    status === "RUNNING" ? 1000 : null
+  );
+
+  const addRecord = (data: Tick) => {
+    recordRef.current.push(data);
+    _setRecord(recordRef.current);
+  };
+
+  const resetRecording = () => {
+    _setRecord([]);
+  };
 
   const setData = (data: Tick) => {
     dataRef.current = data;
@@ -63,12 +103,17 @@ const UserView = (): JSX.Element => {
 
   const dispatchAction = (action: string) => {
     switch (action) {
+      case "CONFIGURE":
+        setConfigModalOpen(true);
+        break;
       case "CONNECT":
         btConnect();
         break;
       case "START":
-      case "RESUME":
         startSession();
+        break;
+      case "RESUME":
+        resumeSession();
         break;
       case "PAUSE":
         pauseSession();
@@ -76,6 +121,19 @@ const UserView = (): JSX.Element => {
       case "END":
         stopSession();
         break;
+    }
+  };
+
+  const calculateCalories = (
+    hr: number,
+    gender: Gender,
+    age: number,
+    weight: number
+  ): number => {
+    if (gender === "MALE") {
+      return (-55.0969 + 0.6309 * hr + 0.1988 * weight + 0.2017 * age) / 4.184;
+    } else {
+      return (-20.4022 + 0.4472 * hr - 0.1263 * weight + 0.074 * age) / 4.184;
     }
   };
 
@@ -90,45 +148,43 @@ const UserView = (): JSX.Element => {
 
     const factor = dataRef.current?.timestamp
       ? 60 / ((ts - dataRef.current.timestamp) / 1000)
-      : 0;
+      : 60;
+    const maxHR = Math.floor(211 - 0.64 * config.age);
 
     const hr = value.getUint8(1) * MULTIPLIER;
-    const hrPerc = hr / 180;
-    const cb =
-      factor &&
-      (-55.0969 + 0.6309 * hr + 0.1988 * 82 + 0.2017 * 32) / 4.184 / factor;
-    const shouldGetGritPoint = hrPerc >= 0.81;
-    const gp = shouldGetGritPoint && factor ? 1 / factor : 0;
 
-    const newCalories = (dataRef.current?.calories || 0) + Math.max(cb, 0);
-    const gritPoints = (dataRef.current?.gritPoints || 0) + gp;
-    console.log({
-      factor: factor,
-      gp: gp,
-      calories: newCalories,
-      currentHeartRate: hr,
-      gritPoints: gritPoints,
-      diff: ts - dataRef.current.timestamp,
-    });
+    const hrPerc = hr / maxHR;
+    const shouldGetGritPoint = hrPerc >= 0.81;
+
+    const cb =
+      calculateCalories(hr, config.gender, config.age, config.weight) / factor;
+    const gp = shouldGetGritPoint ? 1 / factor : 0;
+
+    const totalCalories = (dataRef.current?.calories || 0) + Math.max(cb, 0);
+    const totalGritPoints = (dataRef.current?.gritPoints || 0) + gp;
     setData({
-      calories: newCalories,
+      calories: totalCalories,
       currentHeartRate: hr,
       currentHeartRatePercentage: hrPerc,
-      gritPoints: gritPoints,
+      gritPoints: totalGritPoints,
       timestamp: ts,
     });
   }
 
   function startSession() {
     setStatus("RUNNING");
+    setTimer(0);
     setData({
       calories: 0,
-      currentHeartRate: -1,
+      currentHeartRate: 0,
       currentHeartRatePercentage: 0,
       gritPoints: 0,
       timestamp: 0,
-      ...dataRef.current,
     });
+  }
+
+  function resumeSession() {
+    setStatus("RUNNING");
   }
 
   function pauseSession() {
@@ -136,7 +192,8 @@ const UserView = (): JSX.Element => {
   }
 
   function stopSession() {
-    setStatus("CONNECTED");
+    setStatus("ENDED");
+    resetRecording();
   }
 
   function btConnect() {
@@ -183,31 +240,83 @@ const UserView = (): JSX.Element => {
   }
 
   return (
-    <div className={`${styles.grid}`}>
-      <Tile variant="tile--status">{HEADLINE[status]}</Tile>
-
-      <HRTile
-        value={data?.currentHeartRate}
-        percentage={data?.currentHeartRatePercentage || 0}
+    <>
+      <Head>
+        <title>{`GT81 | ${HEADLINE[status]}`}</title>
+      </Head>
+      <ConfigModal
+        isOpen={configModalOpen}
+        setConfig={setConfig}
+        onDismiss={() => {
+          setConfigModalOpen(false);
+          if (status === "UNCONFIGURED") {
+            setStatus("OFFLINE");
+          }
+        }}
       />
-      <Tile
-        emoji="🔥"
-        headline="calories burned"
-        variant="tile--calories"
-        value={data?.calories}
-      />
+      <div className={styles.grid}>
+        <Tile variant="tile--status">
+          <>
+            <div
+              style={{
+                width: "3.5rem",
+                height: "3.5rem",
+                margin: "0.25rem",
+                textAlign: "center",
+                backgroundColor: "#111",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "0.75rem",
+                border: "1px solid #222",
+              }}
+            >
+              👋
+            </div>
+            {HEADLINE[status]}
+            <div
+              onClick={() => setConfigModalOpen(true)}
+              style={{
+                width: "3.5rem",
+                height: "3.5rem",
+                margin: "0.25rem",
+                textAlign: "center",
+                backgroundColor: "#111",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "0.75rem",
+                border: "1px solid #222",
+              }}
+            >
+              ⚙️
+            </div>
+          </>
+        </Tile>
 
-      <TimerTile timer={timer} status={status} />
+        <HRTile
+          value={data?.currentHeartRate}
+          percentage={data?.currentHeartRatePercentage || 0}
+        />
+        <Tile
+          emoji="🔥"
+          headline="calories burned"
+          variant="tile--calories"
+          value={data?.calories}
+        />
 
-      <Tile
-        emoji="😬"
-        headline="grit points"
-        variant="tile--grit"
-        value={data?.gritPoints}
-      />
+        <TimerTile timer={timer} status={status} />
 
-      <ActionButton status={status} dispatchAction={dispatchAction} />
-    </div>
+        <Tile
+          emoji="😬"
+          headline="grit points"
+          variant="tile--grit"
+          value={data?.gritPoints}
+        />
+
+        <ActionButton status={status} dispatchAction={dispatchAction} />
+      </div>
+    </>
   );
 };
 
