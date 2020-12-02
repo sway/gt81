@@ -19,6 +19,12 @@ div#__next {
   box-sizing: border-box;
 }
 
+p {
+  line-height: 1.5rem;
+  max-width: 34em;
+  font-family: "IBM Plex Mono";
+}
+
 @keyframes blinker {
   50% {
     opacity: 20%;

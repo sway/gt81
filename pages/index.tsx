@@ -1,5 +1,4 @@
-import Head from "next/head";
-import UserView from "../components/UserView";
+import UserView from "@components/app/UserView";
 
 export default function Home(): JSX.Element {
   return (

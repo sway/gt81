@@ -1,58 +1,37 @@
+import { ActionButton } from "@components/buttons/ActionButton";
+import { AboutModal, ConfigModal } from "@components/modals";
+import { HRTile, StatusTile, Tile, TimerTile } from "@components/Tile";
+import { css } from "@emotion/react";
+import { calculateCalories } from "@util/calories";
 import { useInterval } from "@util/interval.hook";
-import React, { useState, useRef } from "react";
+import React, { useRef, useState } from "react";
 import useLocalStorageState from "use-local-storage-state";
-import Head from "next/head";
-
-import styles from "@styles/UserView.module.scss";
-
-import { Tile, ActionButton, HRTile, TimerTile } from "./";
-import { ConfigModal } from "@components/modals";
-
-type Tick = {
-  calories: number | null;
-  currentHeartRate: number | null;
-  currentHeartRatePercentage: number | null;
-  gritPoints: number | null;
-  timestamp: number;
-};
-
-export type Config = {
-  default: boolean;
-  age: number;
-  weight: number;
-  gender: Gender;
-};
-
-export type Status =
-  | "UNCONFIGURED"
-  | "OFFLINE"
-  | "CONNECTING"
-  | "CONNECTED"
-  | "RUNNING"
-  | "PAUSED"
-  | "ENDED";
-
-export type Actions =
-  | "CONNECT"
-  | "DISCONNECT"
-  | "START"
-  | "PAUSE"
-  | "RESUME"
-  | "END";
-
-export type Gender = "MALE" | "FEMALE";
+import { Config, Status, Tick, Workout } from "../globalTypes";
 
 const MULTIPLIER = 1;
 
-const HEADLINE: { [S in Status]: string } = {
-  UNCONFIGURED: "Welcome to GT81! Configure your profile to get started",
-  OFFLINE: "Connect to your HR monitor...",
-  CONNECTING: "Connecting...",
-  CONNECTED: "Ready! Let's do this 💪",
-  RUNNING: "Workout running",
-  PAUSED: "Workout paused",
-  ENDED: "Workout completed, well done!",
-};
+const gridStyles = css`
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  overflow: scroll;
+  grid-template-columns: 1fr minmax(400px, 1fr) 1fr;
+  grid-template-rows: 4rem 4fr 2fr 1fr;
+  grid-template-areas: "status status status" "hr hr hr" "calories timer grit" ". controls .";
+  gap: 1rem;
+  padding: 1rem;
+  font-family: "Work Sans";
+  background-color: #111111;
+  background-image: url("/images/topo.svg");
+  color: white;
+
+  @media screen and (max-width: 768px) {
+    height: auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 10vh 40vh 20vh 20vh 10vh;
+    grid-template-areas: "status status" "hr hr" "timer timer" "calories grit" "controls controls";
+  }
+`;
 
 const UserView = (): JSX.Element => {
   const [data, _setData] = useState<Tick>();
@@ -60,12 +39,21 @@ const UserView = (): JSX.Element => {
   const [timer, setTimer] = useState(0);
   const [btDevice, setBtDevice] = useState<BluetoothDevice>();
   const [configModalOpen, setConfigModalOpen] = useState(false);
-  const [config, setConfig] = useLocalStorageState<Config>("config", {
-    default: true,
-    gender: "MALE",
-    age: 31,
-    weight: 82,
-  });
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [config, _setConfig] = useLocalStorageState<Config>(
+    "gt81-profile1-config",
+    {
+      default: true,
+      gender: "MALE",
+      age: 31,
+      weight: 82,
+      maxHr: 190,
+    }
+  );
+  const [workoutDb, setWorkoutDb] = useLocalStorageState<Array<Tick>>(
+    "gt81-profile1-workouts",
+    []
+  );
   const [status, _setStatus] = useState<Status>(
     config.default ? "UNCONFIGURED" : "OFFLINE"
   );
@@ -101,6 +89,11 @@ const UserView = (): JSX.Element => {
     _setStatus(status);
   };
 
+  const setConfig = (config: Config) => {
+    const maxHr = config.maxHr ?? 211 - 0.64 * config.age;
+    _setConfig({ ...config, maxHr: maxHr });
+  };
+
   const dispatchAction = (action: string) => {
     switch (action) {
       case "CONFIGURE":
@@ -124,19 +117,6 @@ const UserView = (): JSX.Element => {
     }
   };
 
-  const calculateCalories = (
-    hr: number,
-    gender: Gender,
-    age: number,
-    weight: number
-  ): number => {
-    if (gender === "MALE") {
-      return (-55.0969 + 0.6309 * hr + 0.1988 * weight + 0.2017 * age) / 4.184;
-    } else {
-      return (-20.4022 + 0.4472 * hr - 0.1263 * weight + 0.074 * age) / 4.184;
-    }
-  };
-
   function heartRateChange(event: any) {
     if (statusRef.current !== "RUNNING" || !dataRef.current) {
       return;
@@ -149,24 +129,24 @@ const UserView = (): JSX.Element => {
     const factor = dataRef.current?.timestamp
       ? 60 / ((ts - dataRef.current.timestamp) / 1000)
       : 60;
-    const maxHR = Math.floor(211 - 0.64 * config.age);
 
     const hr = value.getUint8(1) * MULTIPLIER;
 
-    const hrPerc = hr / maxHR;
+    const hrPerc = hr / config.maxHr;
     const shouldGetGritPoint = hrPerc >= 0.81;
 
-    const cb =
-      calculateCalories(hr, config.gender, config.age, config.weight) / factor;
+    const cb = calculateCalories(hr, config) / factor;
     const gp = shouldGetGritPoint ? 1 / factor : 0;
 
     const totalCalories = (dataRef.current?.calories || 0) + Math.max(cb, 0);
     const totalGritPoints = (dataRef.current?.gritPoints || 0) + gp;
     setData({
-      calories: totalCalories,
-      currentHeartRate: hr,
-      currentHeartRatePercentage: hrPerc,
-      gritPoints: totalGritPoints,
+      calories: cb,
+      totalCalories: totalCalories,
+      heartRate: hr,
+      heartRatePercentage: hrPerc,
+      gritPoints: gp,
+      totalGritPoints: totalGritPoints,
       timestamp: ts,
     });
   }
@@ -176,9 +156,11 @@ const UserView = (): JSX.Element => {
     setTimer(0);
     setData({
       calories: 0,
-      currentHeartRate: 0,
-      currentHeartRatePercentage: 0,
+      totalCalories: 0,
+      heartRate: 0,
+      heartRatePercentage: 0,
       gritPoints: 0,
+      totalGritPoints: 0,
       timestamp: 0,
     });
   }
@@ -193,7 +175,28 @@ const UserView = (): JSX.Element => {
 
   function stopSession() {
     setStatus("ENDED");
+    const workout = calculateWorkout(record);
+    console.log(workout);
     resetRecording();
+  }
+
+  function calculateWorkout(records: Array<Tick>): Workout {
+    const len = records.length;
+    const first = records[0];
+    const last = records[len - 1];
+    return {
+      c: last.totalCalories,
+      g: last.totalGritPoints,
+      d: len,
+      s: first.timestamp,
+      aH:
+        records.reduce((total, next) => total + (next.heartRate || 0), 0) / len,
+      aP:
+        records.reduce(
+          (total, next) => total + (next.heartRatePercentage || 0),
+          0
+        ) / len,
+    };
   }
 
   function btConnect() {
@@ -230,10 +233,12 @@ const UserView = (): JSX.Element => {
       btDevice.gatt.disconnect();
       setData({
         calories: 0,
-        currentHeartRate: -1,
-        currentHeartRatePercentage: 0,
+        totalCalories: 0,
+        heartRate: -1,
+        heartRatePercentage: 0,
         timestamp: 0,
         gritPoints: 0,
+        totalGritPoints: 0,
       });
       setStatus("OFFLINE");
     }
@@ -241,62 +246,36 @@ const UserView = (): JSX.Element => {
 
   return (
     <>
-      <Head>
-        <title>{`GT81 | ${HEADLINE[status]}`}</title>
-      </Head>
-      <ConfigModal
-        isOpen={configModalOpen}
-        setConfig={setConfig}
-        onDismiss={() => {
-          setConfigModalOpen(false);
-          if (status === "UNCONFIGURED") {
-            setStatus("OFFLINE");
-          }
-        }}
-      />
-      <div className={styles.grid}>
-        <Tile variant="tile--status">
-          <>
-            <div
-              style={{
-                width: "3.5rem",
-                height: "3.5rem",
-                margin: "0.25rem",
-                textAlign: "center",
-                backgroundColor: "#111",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "0.75rem",
-                border: "1px solid #222",
-              }}
-            >
-              👋
-            </div>
-            {HEADLINE[status]}
-            <div
-              onClick={() => setConfigModalOpen(true)}
-              style={{
-                width: "3.5rem",
-                height: "3.5rem",
-                margin: "0.25rem",
-                textAlign: "center",
-                backgroundColor: "#111",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                borderRadius: "0.75rem",
-                border: "1px solid #222",
-              }}
-            >
-              ⚙️
-            </div>
-          </>
-        </Tile>
+      {configModalOpen && (
+        <ConfigModal
+          isOpen={true}
+          config={config}
+          setConfig={setConfig}
+          onDismiss={() => {
+            setConfigModalOpen(false);
+            if (status === "UNCONFIGURED") {
+              setStatus("OFFLINE");
+            }
+          }}
+        />
+      )}
+      {aboutModalOpen && (
+        <AboutModal
+          onDismiss={() => {
+            setAboutModalOpen(false);
+          }}
+        />
+      )}
+      <div css={gridStyles} className={status.toLowerCase()}>
+        <StatusTile
+          status={status}
+          setConfigModalOpen={setConfigModalOpen}
+          setAboutModalOpen={setAboutModalOpen}
+        />
 
         <HRTile
-          value={data?.currentHeartRate}
-          percentage={data?.currentHeartRatePercentage || 0}
+          value={data?.heartRate}
+          percentage={data?.heartRatePercentage || 0}
         />
         <Tile
           emoji="🔥"

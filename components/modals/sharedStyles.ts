@@ -1,4 +1,6 @@
-.button {
+import { css } from "@emotion/react";
+
+export const buttonStyle = css`
   padding: 0.25rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 1rem;
@@ -24,9 +26,8 @@
   &:hover {
     cursor: pointer;
   }
-}
 
-.stop {
-  @extend .button;
-  background-color: deeppink;
-}
+  &.stop {
+    background-color: deeppink;
+  }
+`;

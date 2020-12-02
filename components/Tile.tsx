@@ -1,5 +1,7 @@
+import { Status } from "@components/globalTypes";
+import { css } from "@emotion/react";
 import tileStyles from "@styles/Tiles.module.scss";
-import { Status } from "@components/UserView";
+import Head from "next/head";
 
 export type TileProps = {
   emoji?: string;
@@ -83,6 +85,65 @@ export const TimerTile = (props: {
       >
         {formatTimer(props.timer)}
       </div>
+    </Tile>
+  );
+};
+
+export const StatusTile = (props: {
+  status: Status;
+  setConfigModalOpen(status: boolean): void;
+  setAboutModalOpen(status: boolean): void;
+}): JSX.Element => {
+  const HEADLINE: { [S in Status]: string } = {
+    UNCONFIGURED: "Welcome to GT81! Configure your profile to get started",
+    OFFLINE: "Connect to your HR monitor...",
+    CONNECTING: "Connecting...",
+    CONNECTED: "Ready! Let's do this 💪",
+    RUNNING: "Workout running",
+    PAUSED: "Workout paused",
+    ENDED: "Workout completed, well done!",
+  };
+
+  const buttonCss = css`
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 0.25rem;
+    text-align: center;
+    background-color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    border: 1px solid #222;
+
+    &:hover {
+      background-color: #222;
+      cursor: pointer;
+    }
+  `;
+
+  const headlineCss = css`
+    text-align: center;
+
+    @media screen and (max-width: 768px) {
+      font-size: 1rem;
+    }
+  `;
+
+  return (
+    <Tile variant="tile--status">
+      <>
+        <Head>
+          <title>{`GT81 | ${HEADLINE[props.status]}`}</title>
+        </Head>
+        <div onClick={() => props.setAboutModalOpen(true)} css={buttonCss}>
+          👋
+        </div>
+        <div css={headlineCss}>{HEADLINE[props.status]}</div>
+        <div onClick={() => props.setConfigModalOpen(true)} css={buttonCss}>
+          ⚙️
+        </div>
+      </>
     </Tile>
   );
 };

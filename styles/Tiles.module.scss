@@ -17,7 +17,10 @@
 .tile-headline {
   font-size: 1.25rem;
   text-transform: uppercase;
+  letter-spacing: 1px;
   text-align: center;
+
+  color: #aaa;
 
   @media screen and (max-width: 768px) {
     font-size: 0.9rem;
