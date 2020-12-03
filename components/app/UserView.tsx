@@ -39,7 +39,6 @@ const UserView = (): JSX.Element => {
   const [data, _setData] = useState<Tick>();
   const [record, _setRecord] = useState<Array<Tick>>([]);
   const [timer, setTimer] = useState(0);
-  const [btDevice, setBtDevice] = useState<BluetoothDevice>();
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [aboutModalOpen, setAboutModalOpen] = useState(false);
   const [config, _setConfig] = useLocalStorageState<Config>(
@@ -93,7 +92,7 @@ const UserView = (): JSX.Element => {
   };
 
   const setConfig = (config: Config) => {
-    const maxHr = !config.maxHr && 211 - 0.64 * config.age;
+    const maxHr = 211 - 0.64 * config.age;
     _setConfig({ ...config, maxHr: maxHr });
   };
 
@@ -212,7 +211,6 @@ const UserView = (): JSX.Element => {
     return navigator.bluetooth
       .requestDevice({ filters: [{ services: ["heart_rate"] }] })
       .then((device) => {
-        setBtDevice(device);
         return (device as any).gatt.connect();
       })
       .then((server) => {
@@ -234,22 +232,6 @@ const UserView = (): JSX.Element => {
         setStatus("OFFLINE");
         console.error(e);
       });
-  }
-
-  function btDisconnect() {
-    if (btDevice?.gatt?.connected) {
-      btDevice.gatt.disconnect();
-      setData({
-        calories: 0,
-        totalCalories: 0,
-        heartRate: -1,
-        heartRatePercentage: 0,
-        timestamp: 0,
-        gritPoints: 0,
-        totalGritPoints: 0,
-      });
-      setStatus("OFFLINE");
-    }
   }
 
   return (

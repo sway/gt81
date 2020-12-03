@@ -84,7 +84,8 @@ export const AboutModal = (props: { onDismiss(): void }): JSX.Element => {
             You will need a laptop, tablet, or phone with a modern browser that
             supports (Web) Bluetooth, which are currently Chrome, Firefox, and
             Edge on macOS, Windows, and Android. Sadly, Web Bluetooth is not
-            supported on iOS and iPad OS devices, so there's no way to connect.
+            supported on iOS and iPad OS devices, so there&apos;s no way to
+            connect.
           </p>
           <p>
             You will also need a Bluetooth-enabled heart rate monitor, ideally
@@ -101,16 +102,16 @@ export const AboutModal = (props: { onDismiss(): void }): JSX.Element => {
         <AboutColumn>
           <SubHeading>How do I start?</SubHeading>
           <p>
-            Once you've configured your profile, pur your HR monitor on and
-            click on "Connect to device". Pick the device from the list
-            displayed by the browser to pair and connect. The list only includes
-            HR monitors, so the one you see is likely the one you have.
+            Once you&apos;ve configured your profile, pur your HR monitor on and
+            click on &quot;Connect to device&quot;. Pick the device from the
+            list displayed by the browser to pair and connect. The list only
+            includes HR monitors, so the one you see is likely the one you have.
           </p>
           {isMacOS() && (
             <p css={noteStyle}>
-              💁🏻‍♀️ If you don't see any devices you might need to allow access to
-              Bluetooth to your browser in System Preferences &rarr; Security
-              &amp; Privacy &rarr; Privacy &rarr; Bluetooth.
+              💁🏻‍♀️ If you don&apos;t see any devices you might need to allow
+              access to Bluetooth to your browser in System Preferences &rarr;
+              Security &amp; Privacy &rarr; Privacy &rarr; Bluetooth.
             </p>
           )}
         </AboutColumn>

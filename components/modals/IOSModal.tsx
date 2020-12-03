@@ -12,7 +12,7 @@ export const IOSModal = (): JSX.Element => {
       height="25rem"
     >
       <p>
-        I'm sorry, but GT81 is currently not supported on iOS and iPad OS
+        I&apos;m sorry, but GT81 is currently not supported on iOS and iPad OS
         devices since there is no way to connect to a Bluetooth device from the
         browser.
       </p>
