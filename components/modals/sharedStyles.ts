@@ -15,6 +15,8 @@ export const buttonStyle = css`
   background-color: deepskyblue;
   letter-spacing: 1px;
 
+  outline: none;
+
   @media screen and (max-width: 768px) {
     font-size: 1rem;
   }

@@ -6,9 +6,9 @@ const STATUS_MAPPING: { [S in Status]: { label: string; action: Action } } = {
   UNCONFIGURED: { label: "Configure", action: "CONFIGURE" },
   OFFLINE: { label: "Connect to device", action: "CONNECT" },
   CONNECTING: { label: "Connecting...", action: "VOID" },
-  PAUSED: { label: "Resume", action: "START" },
-  RUNNING: { label: "Pause", action: "RESUME" },
-  CONNECTED: { label: "▶ Start workout", action: "PAUSE" },
+  PAUSED: { label: "Resume", action: "RESUME" },
+  RUNNING: { label: "Pause", action: "PAUSE" },
+  CONNECTED: { label: "▶ Start workout", action: "START" },
   ENDED: { label: "▶ Start new workout", action: "START" },
 };
 

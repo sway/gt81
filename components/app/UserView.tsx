@@ -5,6 +5,7 @@ import { css } from "@emotion/react";
 import { calculateCalories } from "@util/calories";
 import { isIOS } from "@util/deviceDetector";
 import { useInterval } from "@util/interval.hook";
+import { roundToTwo } from "@util/rounder";
 import React, { useRef, useState } from "react";
 import useLocalStorageState from "use-local-storage-state";
 import { Config, Status, Tick, Workout } from "../globalTypes";
@@ -51,7 +52,7 @@ const UserView = (): JSX.Element => {
       maxHr: 190,
     }
   );
-  const [workoutDb, setWorkoutDb] = useLocalStorageState<Array<Tick>>(
+  const [workoutDb, setWorkoutDb] = useLocalStorageState<Array<Workout>>(
     "gt81-profile1-workouts",
     []
   );
@@ -77,6 +78,7 @@ const UserView = (): JSX.Element => {
   };
 
   const resetRecording = () => {
+    recordRef.current = [];
     _setRecord([]);
   };
 
@@ -91,7 +93,7 @@ const UserView = (): JSX.Element => {
   };
 
   const setConfig = (config: Config) => {
-    const maxHr = config.maxHr ?? 211 - 0.64 * config.age;
+    const maxHr = !config.maxHr && 211 - 0.64 * config.age;
     _setConfig({ ...config, maxHr: maxHr });
   };
 
@@ -153,7 +155,6 @@ const UserView = (): JSX.Element => {
   }
 
   function startSession() {
-    setStatus("RUNNING");
     setTimer(0);
     setData({
       calories: 0,
@@ -164,6 +165,7 @@ const UserView = (): JSX.Element => {
       totalGritPoints: 0,
       timestamp: 0,
     });
+    setStatus("RUNNING");
   }
 
   function resumeSession() {
@@ -177,6 +179,9 @@ const UserView = (): JSX.Element => {
   function stopSession() {
     setStatus("ENDED");
     const workout = calculateWorkout(record);
+    const wdb = workoutDb;
+    wdb.push(workout);
+    setWorkoutDb(wdb);
     console.log(workout);
     resetRecording();
   }
@@ -186,17 +191,19 @@ const UserView = (): JSX.Element => {
     const first = records[0];
     const last = records[len - 1];
     return {
-      c: last.totalCalories,
-      g: last.totalGritPoints,
+      c: roundToTwo(last.totalCalories),
+      g: roundToTwo(last.totalGritPoints),
       d: len,
       s: first.timestamp,
-      aH:
-        records.reduce((total, next) => total + (next.heartRate || 0), 0) / len,
-      aP:
+      aH: roundToTwo(
+        records.reduce((total, next) => total + (next.heartRate || 0), 0) / len
+      ),
+      aP: roundToTwo(
         records.reduce(
           (total, next) => total + (next.heartRatePercentage || 0),
           0
-        ) / len,
+        ) / len
+      ),
     };
   }
 
