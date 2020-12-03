@@ -35,12 +35,20 @@ const formCss = css`
     color: white;
     outline: none;
     font-feature-settings: "tnum", "lnum", "zero", "ss06";
+
+    @media screen and (max-width: 768px) {
+      font-size: 2rem;
+    }
   }
 
   label[for^="sex"] {
     font-size: 1.75rem;
     font-weight: 900;
     background-color: #222;
+
+    @media screen and (max-width: 768px) {
+      font-size: 1.25rem;
+    }
   }
 
   input[type="radio"] {
@@ -64,6 +72,10 @@ const formCss = css`
     font-size: 1.25rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+
+    @media screen and (max-width: 768px) {
+      font-size: 1rem;
+    }
   }
 `;
 

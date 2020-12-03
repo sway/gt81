@@ -21,7 +21,6 @@ const closeButtonStyle = css`
   text-align: center;
   line-height: 3.5rem;
   font-size: 2rem;
-  border-radius: 0 1rem 0 1rem;
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.25);
@@ -37,6 +36,10 @@ const headlineStyle = css`
   text-transform: uppercase;
   text-shadow: 2px 0 0 #66d8ff, -2px 0 0 #ff72be;
   padding: 1.5rem 0 0 1.5rem;
+
+  @media screen and (max-width: 768px) {
+    font-size: 1.75rem;
+  }
 `;
 
 export const GenericModal = (props: GenericModalProps): JSX.Element => {
@@ -59,7 +62,7 @@ export const GenericModal = (props: GenericModalProps): JSX.Element => {
       top: "50%",
       left: "50%",
       width: "55vw",
-      minWidth: "450px",
+      minWidth: "350px",
       maxWidth: "700px",
       height: props.height ?? "38rem",
       padding: 0,
@@ -94,7 +97,13 @@ export const GenericModal = (props: GenericModalProps): JSX.Element => {
       style={props.fullscreen ? fullscreenModalStyle : partialModalStyle}
     >
       {props.showClose && (
-        <div css={closeButtonStyle} onClick={() => props.onDismiss()}>
+        <div
+          css={css`
+            ${closeButtonStyle};
+            ${!props.fullscreen && "border-radius: 0 1rem 0 1rem;"};
+          `}
+          onClick={() => props.onDismiss()}
+        >
           ×
         </div>
       )}

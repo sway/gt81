@@ -25,6 +25,19 @@ p {
   font-family: "IBM Plex Mono";
 }
 
+a {
+  color: deepskyblue;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #66d8ff;
+}
+
 @keyframes blinker {
   50% {
     opacity: 20%;

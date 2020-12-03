@@ -1,14 +1,19 @@
 import { GenericModal } from "@components/modals/GenericModal";
 import { css } from "@emotion/react";
+import styled from "@emotion/styled";
+import { isMacOS } from "@util/deviceDetector";
 
-const subHeadingStyle = css`
+const SubHeading = styled.h2`
   text-shadow: 1px 0 0 #66d8ff, -1px 0 0 #ff72be;
   text-align: left;
   width: 100%;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-top: 1.5rem;
+
+  @media screen and (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const noteStyle = css`
@@ -16,6 +21,18 @@ const noteStyle = css`
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 0.75rem;
   font-size: 0.875rem;
+`;
+
+const AboutColumn = styled.div`
+  margin-top: 1.5rem;
+
+  @media screen and (min-width: 768px) {
+    & + & {
+      margin-left: 1.5rem;
+      padding-left: 1.5rem;
+      border-left: 1px solid #222;
+    }
+  }
 `;
 
 export const AboutModal = (props: { onDismiss(): void }): JSX.Element => {
@@ -29,7 +46,10 @@ export const AboutModal = (props: { onDismiss(): void }): JSX.Element => {
     >
       <p
         css={css`
-          font-size: 1.25rem;
+          @media screen and (min-width: 768px) {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+          }
         `}
       >
         This is a web-based version of the workout dashboard you can find in
@@ -41,31 +61,28 @@ export const AboutModal = (props: { onDismiss(): void }): JSX.Element => {
           display: flex;
           flex-direction: row;
 
-          div + div {
-            margin-left: 1.5rem;
-            padding-left: 1.5rem;
-            border-left: 1px solid #222;
+          @media screen and (max-width: 768px) {
+            flex-direction: column;
           }
         `}
       >
-        <div>
-          <h2 css={subHeadingStyle}>How does it work</h2>
+        <AboutColumn>
+          <SubHeading>How does it work</SubHeading>
           <p>
             GT81 connects to your heart-rate monitor over Bluetooth to be able
             to measure your heart rate and calculate the amount of calories
             burned and grit points earned based on your gender, age, and weight.
           </p>
-
           <p>
             All measurement and calculation happens locally and no data is sent
             anywhere.
           </p>
-        </div>
-        <div>
-          <h2 css={subHeadingStyle}>What do I need?</h2>
+        </AboutColumn>
+        <AboutColumn>
+          <SubHeading>What do I need?</SubHeading>
           <p>
             You will need a laptop, tablet, or phone with a modern browser that
-            supports (Web) Bluetooth, which is currently Chrome, Firefox, and
+            supports (Web) Bluetooth, which are currently Chrome, Firefox, and
             Edge on macOS, Windows, and Android. Sadly, Web Bluetooth is not
             supported on iOS and iPad OS devices, so there's no way to connect.
           </p>
@@ -80,21 +97,23 @@ export const AboutModal = (props: { onDismiss(): void }): JSX.Element => {
             </a>
             ).
           </p>
-        </div>
-        <div>
-          <h2 css={subHeadingStyle}>How do I start?</h2>
+        </AboutColumn>
+        <AboutColumn>
+          <SubHeading>How do I start?</SubHeading>
           <p>
             Once you've configured your profile, pur your HR monitor on and
             click on "Connect to device". Pick the device from the list
             displayed by the browser to pair and connect. The list only includes
             HR monitors, so the one you see is likely the one you have.
           </p>
-          <p css={noteStyle}>
-            💁🏻‍♀️ If you don't see any devices you might need to allow access to
-            Bluetooth to your browser in System Preferences &rarr; Security
-            &amp; Privacy &rarr; Privacy &rarr; Bluetooth.
-          </p>
-        </div>
+          {isMacOS() && (
+            <p css={noteStyle}>
+              💁🏻‍♀️ If you don't see any devices you might need to allow access to
+              Bluetooth to your browser in System Preferences &rarr; Security
+              &amp; Privacy &rarr; Privacy &rarr; Bluetooth.
+            </p>
+          )}
+        </AboutColumn>
       </div>
     </GenericModal>
   );

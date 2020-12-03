@@ -1,8 +1,9 @@
 import { ActionButton } from "@components/buttons/ActionButton";
-import { AboutModal, ConfigModal } from "@components/modals";
+import { AboutModal, ConfigModal, IOSModal } from "@components/modals";
 import { HRTile, StatusTile, Tile, TimerTile } from "@components/Tile";
 import { css } from "@emotion/react";
 import { calculateCalories } from "@util/calories";
+import { isIOS } from "@util/deviceDetector";
 import { useInterval } from "@util/interval.hook";
 import React, { useRef, useState } from "react";
 import useLocalStorageState from "use-local-storage-state";
@@ -246,6 +247,7 @@ const UserView = (): JSX.Element => {
 
   return (
     <>
+      {isIOS() && <IOSModal />}
       {configModalOpen && (
         <ConfigModal
           isOpen={true}
