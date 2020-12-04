@@ -1,30 +1,34 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+![GT81 logo](./public/images/logo.png)
 
-## Getting Started
+# GT81
 
-First, run the development server:
+This is a web-based version of the workout dashboard you can find in BEAT81 classes. It was built in 2020 during the 2nd lockdown to be used during both online and offline workouts.
 
-```bash
-npm run dev
-# or
-yarn dev
+Made by [@sway](https://honza.xyz)
+
+## HOW DOES IT WORK
+
+GT81 connects to your heart-rate monitor over Bluetooth to be able to measure your heart rate and calculate the amount of calories burned and grit points earned based on your gender, age, and weight.
+
+All measurement and calculation happens locally and no data is sent anywhere.
+
+You can access it [online](https://gt81.honza.xyz) or clone this repo and run it locally:
+
+```
+yarn install
+yarn run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## WHAT DO I NEED?
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+You will need a laptop, tablet, or phone with a modern browser that supports (Web) Bluetooth, which are currently Chrome, Firefox, and Edge on macOS, Windows, and Android. Sadly, Web Bluetooth is not supported on iOS and iPad OS devices, so there's no way to connect.
 
-## Learn More
+You will also need a Bluetooth-enabled heart rate monitor, ideally in the form of a chest strap. It does not really matter which one you get as long as it supports BLE (Bluetooth Low Energy). generic Bluetooth HR monitor. You can get a generic brand one on Amazon for approx. 30 EUR (e.g. [this one](https://www.amazon.de/-/en/Heartbeat-Bluetooth-Runtastic-Endomtom-Monitor/dp/B07DRKYZKM/)).
 
-To learn more about Next.js, take a look at the following resources:
+## HOW DO I START?
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Once you've configured your profile, pur your HR monitor on and click on "Connect to device". Pick the device from the list displayed by the browser to pair and connect. The list only includes HR monitors, so the one you see is likely the one you have.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+For mac OS users:
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/import?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+> 💁🏻‍♀️ If you don't see any devices you might need to allow access to Bluetooth to your browser in System Preferences → Security & Privacy → Privacy → Bluetooth.

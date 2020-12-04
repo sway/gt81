@@ -1,6 +1,5 @@
 import { Action, Status } from "@components/globalTypes";
-import { buttonStyle } from "@components/modals/sharedStyles";
-import tileStyles from "@styles/Tiles.module.scss";
+import { css } from "@emotion/react";
 
 const STATUS_MAPPING: { [S in Status]: { label: string; action: Action } } = {
   UNCONFIGURED: { label: "Configure", action: "CONFIGURE" },
@@ -18,10 +17,15 @@ export const ActionButton = (props: {
 }): JSX.Element => {
   const shouldShowStop = ["RUNNING", "PAUSED"].includes(props.status);
   return (
-    <div className={tileStyles["tile--controls"]}>
+    <div
+      css={css`
+        grid-area: controls;
+        flex-direction: row;
+        background-color: transparent;
+      `}
+    >
       {shouldShowStop && (
         <button
-          css={buttonStyle}
           className="stop"
           style={{ width: "65%" }}
           onClick={() => props.dispatchAction("END")}
@@ -30,7 +34,6 @@ export const ActionButton = (props: {
         </button>
       )}
       <button
-        css={buttonStyle}
         style={{ width: shouldShowStop ? "35%" : "100%" }}
         disabled={props.status === "CONNECTING"}
         onClick={() =>

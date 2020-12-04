@@ -1,25 +1,98 @@
 import { Status } from "@components/globalTypes";
 import { css } from "@emotion/react";
-import tileStyles from "@styles/Tiles.module.scss";
 import Head from "next/head";
+
+const tileStyle = css`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 4rem;
+  font-weight: 900;
+  border-radius: 1rem;
+  background-color: rgba(0, 0, 0, 0.75);
+  font-feature-settings: "tnum", "lnum", "zero", "ss06";
+
+  @media screen and (max-width: 768px) {
+    font-size: 3rem;
+  }
+
+  .headline {
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+
+    color: #aaa;
+
+    @media screen and (max-width: 768px) {
+      font-size: 0.9rem;
+    }
+  }
+
+  &.status {
+    @extend .tile;
+    grid-area: status;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  &.hr {
+    grid-area: hr;
+    font-size: 13em;
+    transition: background-color 250ms linear;
+
+    &.60perc {
+      background-color: #66d8ff;
+    }
+
+    &.70perc {
+      background-color: deepskyblue;
+    }
+
+    &.80perc {
+      background-color: #ff72be;
+    }
+
+    &.90perc {
+      background-color: deeppink;
+    }
+
+    @media screen and (max-width: 768px) {
+      font-size: 9rem;
+    }
+  }
+
+  &.calories {
+    grid-area: calories;
+  }
+
+  &.grit {
+    grid-area: grit;
+  }
+
+  &.timer {
+    grid-area: timer;
+  }
+`;
 
 export type TileProps = {
   emoji?: string;
   headline?: string;
-  variant: keyof typeof tileStyles;
+  variant: "status" | "hr" | "calories" | "timer" | "grit" | "controls";
+  class?: string;
   value?: number | null;
   children?: JSX.Element | string;
 };
 
 export const Tile = (props: TileProps): JSX.Element => {
   return (
-    <div className={tileStyles[props.variant]}>
-      {props.emoji && (
-        <div className={tileStyles["tile-headline"]}>{props.emoji}</div>
-      )}
-      {props.headline && (
-        <div className={tileStyles["tile-headline"]}>{props.headline}</div>
-      )}
+    <div css={tileStyle} className={[props.variant, props.class].join(" ")}>
+      {props.emoji && <div className="headline">{props.emoji}</div>}
+      {props.headline && <div className="headline">{props.headline}</div>}
       {!props.children && (
         <div>
           {typeof props.value === "number" ? Math.floor(props.value) : "--"}
@@ -35,20 +108,21 @@ export const HRTile = (
     percentage: number;
   }
 ): JSX.Element => {
-  const variant = (perc: number): keyof typeof tileStyles => {
+  const variant = (perc: number): string | undefined => {
     if (perc > 0.6) {
       const value = Math.floor(Math.min(perc, 0.99) * 10) * 10;
-      return `tile--hr--${value}` as keyof typeof tileStyles;
+      return `${value}perc`;
     }
 
-    return "tile--hr";
+    return;
   };
 
   return (
     <Tile
       emoji="❤️"
       headline="heart rate %"
-      variant={variant(props.percentage)}
+      variant="hr"
+      class={variant(props.percentage)}
     >
       <>
         <div>{Math.min(Math.floor(props.percentage * 100), 100)}</div>
@@ -75,7 +149,7 @@ export const TimerTile = (props: {
   };
 
   return (
-    <Tile headline="elapsed time" emoji="⏱" variant="tile--timer">
+    <Tile headline="elapsed time" emoji="⏱" variant="timer">
       <div
         style={
           props.status === "PAUSED"
@@ -96,7 +170,7 @@ export const StatusTile = (props: {
 }): JSX.Element => {
   const HEADLINE: { [S in Status]: string } = {
     UNCONFIGURED: "Welcome to GT81! Configure your profile to get started",
-    OFFLINE: "Connect to your HR monitor...",
+    OFFLINE: "Connect to your HR monitor",
     CONNECTING: "Connecting...",
     CONNECTED: "Ready! Let's do this 💪",
     RUNNING: "Workout running",
@@ -131,7 +205,7 @@ export const StatusTile = (props: {
   `;
 
   return (
-    <Tile variant="tile--status">
+    <Tile variant="status">
       <>
         <Head>
           <title>{`GT81 | ${HEADLINE[props.status]}`}</title>

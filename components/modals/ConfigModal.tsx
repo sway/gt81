@@ -1,5 +1,4 @@
 import { Config } from "@components/globalTypes";
-import { buttonStyle } from "@components/modals/sharedStyles";
 import { css } from "@emotion/react";
 import { FormEvent, useState } from "react";
 import { GenericModal } from ".";
@@ -85,7 +84,7 @@ export const ConfigModal = (props: ConfigModalProps): JSX.Element => {
   return (
     <GenericModal
       isOpen={props.isOpen}
-      showClose={!props.config.default}
+      showClose={true}
       onDismiss={props.onDismiss}
       headline="Your profile"
     >
@@ -164,7 +163,6 @@ export const ConfigModal = (props: ConfigModalProps): JSX.Element => {
       </form>
       <button
         css={css`
-          ${buttonStyle};
           width: calc(100% - 3rem);
           position: absolute;
           bottom: 2rem;

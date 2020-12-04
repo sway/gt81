@@ -94,6 +94,9 @@ const UserView = (): JSX.Element => {
   const setConfig = (config: Config) => {
     const maxHr = 211 - 0.64 * config.age;
     _setConfig({ ...config, maxHr: maxHr });
+    if (!config.default && statusRef.current === "UNCONFIGURED") {
+      setStatus("OFFLINE");
+    }
   };
 
   const dispatchAction = (action: string) => {
@@ -244,9 +247,6 @@ const UserView = (): JSX.Element => {
           setConfig={setConfig}
           onDismiss={() => {
             setConfigModalOpen(false);
-            if (status === "UNCONFIGURED") {
-              setStatus("OFFLINE");
-            }
           }}
         />
       )}
@@ -271,7 +271,7 @@ const UserView = (): JSX.Element => {
         <Tile
           emoji="🔥"
           headline="calories burned"
-          variant="tile--calories"
+          variant="calories"
           value={data?.calories}
         />
 
@@ -280,7 +280,7 @@ const UserView = (): JSX.Element => {
         <Tile
           emoji="😬"
           headline="grit points"
-          variant="tile--grit"
+          variant="grit"
           value={data?.gritPoints}
         />
 
