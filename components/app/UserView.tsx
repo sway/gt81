@@ -9,8 +9,6 @@ import React, { useRef, useState } from "react";
 import useLocalStorageState from "use-local-storage-state";
 import { Config, Status, Tick, Workout } from "../globalTypes";
 
-const MULTIPLIER = 1;
-
 const gridStyles = css`
   width: 100vw;
   height: 100vh;
