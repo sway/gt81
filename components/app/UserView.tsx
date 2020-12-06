@@ -2,10 +2,9 @@ import { ActionButton } from "@components/buttons/ActionButton";
 import { AboutModal, ConfigModal, IOSModal } from "@components/modals";
 import { HRTile, StatusTile, Tile, TimerTile } from "@components/Tile";
 import { css } from "@emotion/react";
-import { calculateCalories } from "@util/calories";
 import { isIOS } from "@util/deviceDetector";
 import { useInterval } from "@util/interval.hook";
-import { roundToTwo } from "@util/rounder";
+import { calculateCalories, calculateWorkout } from "@util/workoutMagic";
 import React, { useRef, useState } from "react";
 import useLocalStorageState from "use-local-storage-state";
 import { Config, Status, Tick, Workout } from "../globalTypes";
@@ -62,6 +61,7 @@ const UserView = (): JSX.Element => {
   const dataRef = useRef(data);
   const statusRef = useRef(status);
   const recordRef = useRef(record);
+  const configRef = useRef(config);
 
   useInterval(
     () => {
@@ -81,20 +81,21 @@ const UserView = (): JSX.Element => {
     _setRecord([]);
   };
 
-  const setData = (data: Tick) => {
-    dataRef.current = data;
-    _setData(data);
+  const setData = (d: Tick) => {
+    dataRef.current = d;
+    _setData(d);
   };
 
-  const setStatus = (status: Status) => {
-    statusRef.current = status;
-    _setStatus(status);
+  const setStatus = (s: Status) => {
+    statusRef.current = s;
+    _setStatus(s);
   };
 
-  const setConfig = (config: Config) => {
-    const maxHr = 211 - 0.64 * config.age;
-    _setConfig({ ...config, maxHr: maxHr });
-    if (!config.default && statusRef.current === "UNCONFIGURED") {
+  const setConfig = (c: Config) => {
+    const maxHr = 211 - 0.64 * c.age;
+    configRef.current = { ...c, maxHr: maxHr };
+    _setConfig({ ...c, maxHr: maxHr });
+    if (!c.default && statusRef.current === "UNCONFIGURED") {
       setStatus("OFFLINE");
     }
   };
@@ -127,30 +128,32 @@ const UserView = (): JSX.Element => {
       return;
     }
 
-    const value = event.target.value;
-
     const ts = Date.now();
+    const fraction = dataRef.current.timestamp
+      ? (ts - dataRef.current.timestamp) / 1000
+      : 1;
+    const factor = 60 / fraction;
 
-    const factor = dataRef.current?.timestamp
-      ? 60 / ((ts - dataRef.current.timestamp) / 1000)
-      : 60;
+    const value = event.target.value;
+    const hrValue = value.getUint8(1);
+    const hrPerc = hrValue / configRef.current.maxHr;
 
-    const hr = value.getUint8(1) * MULTIPLIER;
+    const calorieBurn = calculateCalories(hrValue, configRef.current) / factor;
 
-    const hrPerc = hr / config.maxHr;
     const shouldGetGritPoint = hrPerc >= 0.81;
+    const gritPoints = shouldGetGritPoint ? 1 / factor : 0;
 
-    const cb = calculateCalories(hr, config) / factor;
-    const gp = shouldGetGritPoint ? 1 / factor : 0;
+    const totalCalories =
+      (dataRef.current?.totalCalories || 0) + Math.max(calorieBurn, 0);
+    const totalGritPoints =
+      (dataRef.current?.totalGritPoints || 0) + gritPoints;
 
-    const totalCalories = (dataRef.current?.calories || 0) + Math.max(cb, 0);
-    const totalGritPoints = (dataRef.current?.gritPoints || 0) + gp;
     setData({
-      calories: cb,
-      totalCalories: totalCalories,
-      heartRate: hr,
+      calories: calorieBurn,
+      gritPoints: gritPoints,
+      heartRate: hrValue,
       heartRatePercentage: hrPerc,
-      gritPoints: gp,
+      totalCalories: totalCalories,
       totalGritPoints: totalGritPoints,
       timestamp: ts,
     });
@@ -184,29 +187,7 @@ const UserView = (): JSX.Element => {
     const wdb = workoutDb;
     wdb.push(workout);
     setWorkoutDb(wdb);
-    console.log(workout);
     resetRecording();
-  }
-
-  function calculateWorkout(records: Array<Tick>): Workout {
-    const len = records.length;
-    const first = records[0];
-    const last = records[len - 1];
-    return {
-      c: roundToTwo(last.totalCalories),
-      g: roundToTwo(last.totalGritPoints),
-      d: len,
-      s: first.timestamp,
-      aH: roundToTwo(
-        records.reduce((total, next) => total + (next.heartRate || 0), 0) / len
-      ),
-      aP: roundToTwo(
-        records.reduce(
-          (total, next) => total + (next.heartRatePercentage || 0),
-          0
-        ) / len
-      ),
-    };
   }
 
   function btConnect() {
@@ -257,7 +238,7 @@ const UserView = (): JSX.Element => {
           }}
         />
       )}
-      <div css={gridStyles} className={status.toLowerCase()}>
+      <div css={gridStyles}>
         <StatusTile
           status={status}
           setConfigModalOpen={setConfigModalOpen}

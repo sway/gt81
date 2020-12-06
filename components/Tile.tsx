@@ -1,6 +1,7 @@
 import { Status } from "@components/globalTypes";
 import { css } from "@emotion/react";
 import Head from "next/head";
+import { useEffect, useState } from "react";
 
 const tileStyle = css`
   display: flex;
@@ -168,6 +169,7 @@ export const StatusTile = (props: {
   setConfigModalOpen(status: boolean): void;
   setAboutModalOpen(status: boolean): void;
 }): JSX.Element => {
+  const [statusText, setStatusText] = useState("");
   const HEADLINE: { [S in Status]: string } = {
     UNCONFIGURED: "Welcome to GT81! Configure your profile to get started",
     OFFLINE: "Connect to your HR monitor",
@@ -204,16 +206,20 @@ export const StatusTile = (props: {
     }
   `;
 
+  useEffect(() => {
+    setStatusText(HEADLINE[props.status]);
+  }, [props.status]);
+
   return (
     <Tile variant="status">
       <>
         <Head>
-          <title>{`GT81 | ${HEADLINE[props.status]}`}</title>
+          <title>{`GT81${statusText && ` | ${statusText}`}`}</title>
         </Head>
         <div onClick={() => props.setAboutModalOpen(true)} css={buttonCss}>
           👋
         </div>
-        <div css={headlineCss}>{HEADLINE[props.status]}</div>
+        <div css={headlineCss}>{statusText}</div>
         <div onClick={() => props.setConfigModalOpen(true)} css={buttonCss}>
           ⚙️
         </div>
