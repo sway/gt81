@@ -1,8 +1,8 @@
 import { ActionButton } from "@components/buttons/ActionButton";
-import { AboutModal, ConfigModal, IOSModal } from "@components/modals";
+import { AboutModal, ConfigModal, NotSupportedModal } from "@components/modals";
 import { HRTile, StatusTile, Tile, TimerTile } from "@components/Tile";
 import { css } from "@emotion/react";
-import { isIOS } from "@util/deviceDetector";
+import { isIOS, isSafari } from "@util/deviceDetector";
 import { useInterval } from "@util/interval.hook";
 import { calculateCalories, calculateWorkout } from "@util/workoutMagic";
 import React, { useRef, useState } from "react";
@@ -218,7 +218,7 @@ const UserView = (): JSX.Element => {
 
   return (
     <>
-      {isIOS() && <IOSModal />}
+      {(isIOS() || isSafari()) && <NotSupportedModal />}
       {configModalOpen && (
         <ConfigModal
           isOpen={true}
