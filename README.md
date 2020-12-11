@@ -32,3 +32,9 @@ Once you've configured your profile, pur your HR monitor on and click on "Connec
 For mac OS users:
 
 > 💁🏻‍♀️ If you don't see any devices you might need to allow access to Bluetooth to your browser in System Preferences → Security & Privacy → Privacy → Bluetooth.
+
+## LICENSE
+
+This work is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1).
+
+This license requires that reusers give credit to the creator. It allows reusers to distribute, remix, adapt, and build upon the material in any medium or format, for noncommercial purposes only. If others modify or adapt the material, they must license the modified material under identical terms.
