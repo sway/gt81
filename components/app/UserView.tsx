@@ -2,6 +2,7 @@ import { ActionButton } from "@components/buttons/ActionButton";
 import { AboutModal, ConfigModal, NotSupportedModal } from "@components/modals";
 import { HRTile, StatusTile, Tile, TimerTile } from "@components/Tile";
 import { css } from "@emotion/react";
+import { demoData } from "@util/demoData";
 import { isIOS, isSafari } from "@util/deviceDetector";
 import { useInterval } from "@util/interval.hook";
 import { calculateCalories, calculateWorkout } from "@util/workoutMagic";
@@ -69,6 +70,23 @@ const UserView = (): JSX.Element => {
     status === "RUNNING" ? 1000 : null
   );
 
+  // DEMO INTERVAL
+  useInterval(
+    () => {
+      setTimer(timer + 1);
+      const d = demoData[timer];
+      const buffer = new ArrayBuffer(16);
+      const view = new DataView(buffer);
+      view.setUint8(1, d);
+      heartRateChange({
+        target: {
+          value: view,
+        },
+      });
+    },
+    status === "DEMO_RUNNING" ? 1000 : null
+  );
+
   const addRecord = (data: Tick) => {
     recordRef.current.push(data);
     _setRecord(recordRef.current);
@@ -104,7 +122,8 @@ const UserView = (): JSX.Element => {
         setConfigModalOpen(true);
         break;
       case "CONNECT":
-        btConnect();
+        startDemo();
+        //btConnect();
         break;
       case "START":
         startSession();
@@ -122,7 +141,7 @@ const UserView = (): JSX.Element => {
   };
 
   function heartRateChange(event: any) {
-    if (statusRef.current !== "RUNNING" || !dataRef.current) {
+    if (statusRef.current !== "DEMO_RUNNING" || !dataRef.current) {
       return;
     }
 
@@ -188,6 +207,21 @@ const UserView = (): JSX.Element => {
     resetRecording();
   }
 
+  function startDemo() {
+    setTimer(0);
+    setData({
+      calories: 0,
+      totalCalories: 0,
+      heartRate: 0,
+      heartRatePercentage: 0,
+      gritPoints: 0,
+      totalGritPoints: 0,
+      timestamp: 0,
+    });
+
+    setStatus("DEMO_RUNNING");
+  }
+
   function btConnect() {
     setStatus("CONNECTING");
     return navigator.bluetooth
@@ -251,7 +285,7 @@ const UserView = (): JSX.Element => {
           emoji="🔥"
           headline="calories burned"
           variant="calories"
-          value={data?.calories}
+          value={data?.totalCalories}
         />
 
         <TimerTile timer={timer} status={status} />
@@ -260,7 +294,7 @@ const UserView = (): JSX.Element => {
           emoji="😬"
           headline="grit points"
           variant="grit"
-          value={data?.gritPoints}
+          value={data?.totalGritPoints}
         />
 
         <ActionButton status={status} dispatchAction={dispatchAction} />

@@ -8,6 +8,7 @@ const STATUS_MAPPING: { [S in Status]: { label: string; action: Action } } = {
   CONNECTING: { label: "Connecting...", action: "VOID" },
   PAUSED: { label: "Resume", action: "RESUME" },
   RUNNING: { label: "Pause", action: "PAUSE" },
+  DEMO_RUNNING: { label: "Pause", action: "PAUSE" },
   CONNECTED: { label: "▶ Start workout", action: "START" },
   ENDED: { label: "▶ Start new workout", action: "START" },
 };
@@ -17,7 +18,9 @@ export const ActionButton = (props: {
   dispatchAction(action: Action): void;
 }): JSX.Element => {
   const [buttonText, setButtonText] = useState("");
-  const shouldShowStop = ["RUNNING", "PAUSED"].includes(props.status);
+  const shouldShowStop = ["RUNNING", "DEMO_RUNNING", "PAUSED"].includes(
+    props.status
+  );
 
   useEffect(() => {
     setButtonText(STATUS_MAPPING[props.status].label);

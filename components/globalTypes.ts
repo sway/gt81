@@ -32,7 +32,8 @@ export type Status =
   | "CONNECTED"
   | "RUNNING"
   | "PAUSED"
-  | "ENDED";
+  | "ENDED"
+  | "DEMO_RUNNING";
 
 export type Action =
   | "CONFIGURE"

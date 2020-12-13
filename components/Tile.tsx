@@ -24,7 +24,7 @@ const tileStyle = css`
     letter-spacing: 1px;
     text-align: center;
 
-    color: #aaa;
+    color: rgba(255, 255, 255, 0.75);
 
     @media screen and (max-width: 768px) {
       font-size: 0.9rem;
@@ -45,22 +45,6 @@ const tileStyle = css`
     grid-area: hr;
     font-size: 13em;
     transition: background-color 250ms linear;
-
-    &.60perc {
-      background-color: #66d8ff;
-    }
-
-    &.70perc {
-      background-color: deepskyblue;
-    }
-
-    &.80perc {
-      background-color: #ff72be;
-    }
-
-    &.90perc {
-      background-color: deeppink;
-    }
 
     @media screen and (max-width: 768px) {
       font-size: 9rem;
@@ -110,28 +94,39 @@ export const HRTile = (
   }
 ): JSX.Element => {
   const variant = (perc: number): string | undefined => {
-    if (perc > 0.6) {
-      const value = Math.floor(Math.min(perc, 0.99) * 10) * 10;
-      return `${value}perc`;
+    if (perc >= 0.91) {
+      return "deeppink";
+    }
+    if (perc >= 0.81) {
+      return "#ff72be";
+    }
+    if (perc >= 0.71) {
+      return "deepskyblue";
+    }
+    if (perc >= 0.61) {
+      return "#66d8ff";
     }
 
     return;
   };
 
   return (
-    <Tile
-      emoji="❤️"
-      headline="heart rate %"
-      variant="hr"
-      class={variant(props.percentage)}
+    <div
+      css={css`
+        ${tileStyle};
+        ${props.percentage > 0.61
+          ? `background-color: ${variant(props.percentage)}`
+          : ""}
+      `}
+      className="hr"
     >
-      <>
-        <div>{Math.min(Math.floor(props.percentage * 100), 100)}</div>
-        <div style={{ fontSize: "2rem", color: "rgba(255,255,255,0.75))" }}>
-          ♥ {Math.floor(props.value || 0)}
-        </div>
-      </>
-    </Tile>
+      <div className="headline">❤️</div>
+      <div className="headline">Heart rate %</div>
+      <div>{Math.min(Math.floor(props.percentage * 100), 100)}</div>
+      <div style={{ fontSize: "2rem", color: "rgba(255,255,255,0.75))" }}>
+        ♥ {Math.floor(props.value || 0)}
+      </div>
+    </div>
   );
 };
 
@@ -176,6 +171,7 @@ export const StatusTile = (props: {
     CONNECTING: "Connecting...",
     CONNECTED: "Ready! Let's do this 💪",
     RUNNING: "Workout running",
+    DEMO_RUNNING: "Workout running",
     PAUSED: "Workout paused",
     ENDED: "Workout completed, well done!",
   };
