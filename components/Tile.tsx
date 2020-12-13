@@ -24,7 +24,7 @@ const tileStyle = css`
     letter-spacing: 1px;
     text-align: center;
 
-    color: #aaa;
+    color: rgba(255, 255, 255, 0.75);
 
     @media screen and (max-width: 768px) {
       font-size: 0.9rem;
@@ -108,7 +108,7 @@ export const HRTile = (
       : value === 70
       ? "deepskyblue"
       : value === 60
-      ? "66d8ff"
+      ? "#66d8ff"
       : undefined;
   };
 
