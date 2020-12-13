@@ -251,7 +251,7 @@ const UserView = (): JSX.Element => {
           emoji="🔥"
           headline="calories burned"
           variant="calories"
-          value={data?.calories}
+          value={data?.totalCalories}
         />
 
         <TimerTile timer={timer} status={status} />
@@ -260,7 +260,7 @@ const UserView = (): JSX.Element => {
           emoji="😬"
           headline="grit points"
           variant="grit"
-          value={data?.gritPoints}
+          value={data?.totalGritPoints}
         />
 
         <ActionButton status={status} dispatchAction={dispatchAction} />

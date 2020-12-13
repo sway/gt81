@@ -1,5 +1,5 @@
 import { Status } from "@components/globalTypes";
-import { css } from "@emotion/react";
+import { css, SerializedStyles } from "@emotion/react";
 import Head from "next/head";
 import { useEffect, useState } from "react";
 
@@ -46,22 +46,6 @@ const tileStyle = css`
     font-size: 13em;
     transition: background-color 250ms linear;
 
-    &.60perc {
-      background-color: #66d8ff;
-    }
-
-    &.70perc {
-      background-color: deepskyblue;
-    }
-
-    &.80perc {
-      background-color: #ff72be;
-    }
-
-    &.90perc {
-      background-color: deeppink;
-    }
-
     @media screen and (max-width: 768px) {
       font-size: 9rem;
     }
@@ -84,14 +68,20 @@ export type TileProps = {
   emoji?: string;
   headline?: string;
   variant: "status" | "hr" | "calories" | "timer" | "grit" | "controls";
-  class?: string;
+  customCss?: SerializedStyles;
   value?: number | null;
   children?: JSX.Element | string;
 };
 
 export const Tile = (props: TileProps): JSX.Element => {
   return (
-    <div css={tileStyle} className={[props.variant, props.class].join(" ")}>
+    <div
+      css={css`
+        ${tileStyle};
+        ${props.customCss}
+      `}
+      className={props.variant}
+    >
       {props.emoji && <div className="headline">{props.emoji}</div>}
       {props.headline && <div className="headline">{props.headline}</div>}
       {!props.children && (
@@ -110,12 +100,16 @@ export const HRTile = (
   }
 ): JSX.Element => {
   const variant = (perc: number): string | undefined => {
-    if (perc > 0.6) {
-      const value = Math.floor(Math.min(perc, 0.99) * 10) * 10;
-      return `${value}perc`;
-    }
-
-    return;
+    const value = Math.floor(Math.min(perc - 0.01, 0.99) * 10) * 10;
+    return value === 90
+      ? "deeppink"
+      : value === 80
+      ? "#ff72be"
+      : value === 70
+      ? "deepskyblue"
+      : value === 60
+      ? "66d8ff"
+      : undefined;
   };
 
   return (
@@ -123,7 +117,9 @@ export const HRTile = (
       emoji="❤️"
       headline="heart rate %"
       variant="hr"
-      class={variant(props.percentage)}
+      customCss={css`
+        background-color: ${variant(props.percentage) ?? "rgba(0, 0, 0, 0.75)"};
+      `}
     >
       <>
         <div>{Math.min(Math.floor(props.percentage * 100), 100)}</div>

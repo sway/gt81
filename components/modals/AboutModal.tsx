@@ -53,8 +53,11 @@ export const AboutModal = (props: { onDismiss(): void }): JSX.Element => {
         `}
       >
         This is a web-based version of the workout dashboard you can find in
-        BEAT81 classes. It was built in 2020 during the 2nd lockdown to be used
-        during both online and offline workouts.
+        BEAT81 classes. It was built by{" "}
+        <a href="https://honza.xyz">@itshonza</a> in 2020 during the 2nd
+        lockdown to be used during both online and offline workouts. You can
+        find the source code on{" "}
+        <a href="https://github.com/sway/gt81">Github</a>.
       </p>
       <div
         css={css`
