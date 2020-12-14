@@ -13,7 +13,6 @@
     "@emotion/styled": "^11.0.0",
     "fontsource-ibm-plex-mono": "^3.0.9",
     "next": "10.0.1",
-    "node-sass": "^5.0.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-modal": "^3.11.2",
