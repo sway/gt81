@@ -1,8 +1,16 @@
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import ReactGA from "react-ga";
 import "../styles/globals.scss";
 
-function MyApp({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps, router }: AppProps) {
+  if (process.env.NEXT_PUBLIC_GA_SETTINGS_ID) {
+    ReactGA.initialize(process.env.NEXT_PUBLIC_GA_SETTINGS_ID, {
+      debug: process.env.NODE_ENV === "development",
+    });
+    ReactGA.pageview(router.asPath);
+  }
+
   return (
     <>
       <Head>
@@ -50,4 +58,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default MyApp;
+export default App;
