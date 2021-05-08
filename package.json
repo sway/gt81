@@ -18,7 +18,7 @@
     "react-ga": "^3.3.0",
     "react-modal": "^3.11.2",
     "sass": "^1.30.0",
-    "ua-parser-js": "^0.7.22",
+    "ua-parser-js": "^0.7.24",
     "use-local-storage-state": "^6.0.0"
   },
   "devDependencies": {
